@@ -15,7 +15,7 @@ read output
 echo -e "\e[32mFinding subdomains....\e[0m"
 subfinder -silent -d $domain > dom.tmp
 amass  enum -nocolor -d $domain -o amass -silent
-cat amass | awk -F "-->" '{print $3}' | grep -E -v "RIROrganization|Netblock" | cut -d "(" -f 1 | grep -v "\\s+" | sed -E 's/^\s+//g' | grep -E -v "\S+:\S+:\S+:\S+::\S+" | grep -E -v "\S+:\S+:\S+::\S+:\S+"|grep -E -v "\S+:\S+:\S+:\S+:\S+:\S+:\S+:\S+" | grep -E -v "\S+:\S+:\S+::\S+" | grep -E -v "\S+:\S+:\S+:\S+::">dom.tmp
+cat amass | awk -F "-->" '{print $3}' | grep -E -v "RIROrganization|Netblock" | cut -d "(" -f 1 | grep -v "\\s+" | sed -E 's/^\s+//g' | grep -E -v "\S+:\S+:\S+:\S+::\S+" | grep -E -v "\S+:\S+:\S+::\S+:\S+"|grep -E -v "\S+:\S+:\S+:\S+:\S+:\S+:\S+:\S+" | grep -E -v "\S+:\S+:\S+::\S+" | grep -E -v "\S+:\S+:\S+:\S+::">>dom.tmp
 echo -e "\e[32mFinding open ports....\e[0m"
 naabu -silent -top-ports 1000 -list dom.tmp -o ports.tmp
 cat ports.tmp | sed -e "s/^/https:\/\//g" > https.tmp
