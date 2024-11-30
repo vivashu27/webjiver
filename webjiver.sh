@@ -13,7 +13,10 @@ echo "Enter the output file"
 read output
 
 echo -e "\e[32mFinding subdomains....\e[0m"
-subfinder -silent -d $domain > dom.tmp
+subfinder -silent -d $domain > d.tmp
+assetfinder $domain >> d.tmp
+cat d.tmp | sort | uniq > dom.tmp
+rm d.tmp
 amass  enum -nocolor -d $domain -o amass -silent
 cat amass | awk -F "-->" '{print $3}' | grep -E -v "RIROrganization|Netblock" | cut -d "(" -f 1 | grep -v "\\s+" | sed -E 's/^\s+//g' | grep -E -v "\S+:\S+:\S+:\S+::\S+" | grep -E -v "\S+:\S+:\S+::\S+:\S+"|grep -E -v "\S+:\S+:\S+:\S+:\S+:\S+:\S+:\S+" | grep -E -v "\S+:\S+:\S+::\S+" | grep -E -v "\S+:\S+:\S+:\S+::">>dom.tmp
 echo -e "\e[32mFinding open ports....\e[0m"
