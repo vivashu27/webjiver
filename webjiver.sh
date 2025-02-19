@@ -1,10 +1,10 @@
 #!/bin/bash
 
-#katana 2> /dev/null
-#if [ "$?" != "" ];then
- #   echo -e "\e[31mPlease Download katana first\e[0m"
-  #  exit
-#fi
+katana 2> /dev/null
+if [ "$?" != "" ];then
+    echo -e "\e[31mPlease Download katana first\e[0m"
+    exit
+fi
 
 echo "Enter the domain to scan"
 read domain
@@ -22,21 +22,10 @@ cat amass | awk -F "-->" '{print $3}' | grep -E -v "RIROrganization|Netblock" | 
 echo -e "\e[32mFinding open ports....\e[0m"
 naabu -silent -top-ports 1000 -list dom.tmp -o ports.tmp
 cat ports.tmp | sed -e "s/^/https:\/\//g" > https.tmp
-cat ports.tmp | sed  -e "s/^/http:\/\//g" > http.tmp
+cat ports.tmp | sed  -e "s/^/http:\/\//g" >> https.tmp
 
 echo -e "\e[32mChecking the connectivity....\e[0m"
-while read http; do
-    if [ "$(httpx --timeout 3 --no-verify $http | grep -o 'ReadTimeout')" == "" ]; then
-        echo $http >> validhttp.tmp
-    fi
-done < http.tmp
-
-while read https; do
-    if [ "$(httpx --timeout 3 --no-verify $https | grep -o 'ReadTimeout')" == "" ]; then
-        echo $https >> validhttp.tmp
-    fi
-done < https.tmp
-
+cat https.tmp | httpx -mc 200,302,403 -nc -o validhttp.tmp
 
 echo -e "\e[32mSpidering and Finding endpoints....\e[0m"
 paramspider -l dom.tmp > param.tmp
