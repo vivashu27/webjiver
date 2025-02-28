@@ -25,7 +25,7 @@ cat ports.tmp | sed -e "s/^/https:\/\//g" > https.tmp
 cat ports.tmp | sed  -e "s/^/http:\/\//g" >> https.tmp
 
 echo -e "\e[32mChecking the connectivity....\e[0m"
-cat https.tmp | httpx -fr -mc 200,302,403 -nc -o validhttp.tmp
+cat https.tmp | httpx -fr -mc 200,302,404 -nc -o validhttp.tmp
 
 echo -e "\e[32mSpidering and Finding endpoints....\e[0m"
 paramspider -l dom.tmp > param.tmp
