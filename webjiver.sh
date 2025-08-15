@@ -24,12 +24,15 @@ cat https.tmp | httpx -mc 200,302,403,404 -nc -o validhttp.tmp
 echo -e "\e[32mSpidering and Finding endpoints....\e[0m"
 paramspider -l dom.tmp > param.tmp
 cat validhttp.tmp | hakrawler -insecure -u  > hakcraw.tmp
+urlfinder -d validhttp.tmp -o urlfinder.tmp
 
 while read domain; do
-	cat results/$domain.txt 2> /dev/null  1>> $output.tmp
+        cat results/$domain.txt 2> /dev/null  1>> $output.tmp
 done < dom.tmp
 
 cat hakcraw.tmp >> $output.tmp
+cat urlfinder.tmp >> $output.tmp
 cat $output.tmp | sort | uniq | uro > $output
 
 echo "Saved to your output file: $output"
+
