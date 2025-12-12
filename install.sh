@@ -174,6 +174,88 @@ install_python_tool() {
   fi
 }
 
+# Install Python tool via pipx
+install_python_tool_pipx() {
+  local tool_name="$1"
+  local package_name="${2:-$1}"
+
+  if command_exists "$tool_name"; then
+    log_info "${tool_name} is already installed: $(command -v ${tool_name})"
+    return 0
+  fi
+
+  if ! command_exists pipx; then
+    log_error "pipx is not installed; cannot install ${tool_name} via pipx"
+    log_info "Install pipx: python3 -m pip install --user pipx && python3 -m pipx ensurepath"
+    return 1
+  fi
+
+  log_step "Installing ${tool_name} via pipx..."
+  if pipx install "${package_name}" 2>/dev/null; then
+    log_good "${tool_name} installed successfully via pipx"
+    return 0
+  else
+    log_error "Failed to install ${tool_name} via pipx"
+    return 1
+  fi
+}
+
+# Install paramspider from source (requires git)
+install_paramspider() {
+  local repo_url="https://github.com/devanshbatham/paramspider"
+
+  if command_exists "paramspider"; then
+    log_info "paramspider is already installed: $(command -v paramspider)"
+    return 0
+  fi
+
+  if ! command_exists git; then
+    log_error "Git is required to install paramspider from source."
+    return 1
+  fi
+
+  local tmp_dir
+  tmp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t 'paramspider')"
+  if [[ -z "${tmp_dir}" || "${tmp_dir}" == "/" ]]; then
+    log_error "Failed to create temporary directory for paramspider"
+    return 1
+  fi
+
+  log_step "Installing paramspider from source..."
+  local pip_cmd="pip3"
+  if command_exists pip && ! command_exists pip3; then
+    pip_cmd="pip"
+  fi
+
+  if (
+    cd "${tmp_dir}" &&
+    git clone "${repo_url}" &&
+    cd paramspider &&
+    ${pip_cmd} install --user .
+  ); then
+    log_good "paramspider installed successfully"
+  else
+    log_error "Failed to install paramspider"
+    rm -rf "${tmp_dir}" || true
+    return 1
+  fi
+
+  rm -rf "${tmp_dir}" || true
+
+  if command_exists "paramspider"; then
+    log_good "paramspider is available in PATH"
+  else
+    log_warn "paramspider installed but not in PATH"
+    local user_bin="$HOME/.local/bin"
+    if [[ ":$PATH:" != *":${user_bin}:"* ]]; then
+      log_info "Add this to your ~/.bashrc or ~/.zshrc:"
+      log_info "  export PATH=\$PATH:\$HOME/.local/bin"
+    fi
+  fi
+
+  return 0
+}
+
 # Main installation function
 main() {
   echo -e "${CYAN}"
@@ -210,7 +292,7 @@ main() {
   
   local failed_tools=()
   local installed_count=0
-  sudo apt install -y libpcap-dev
+  
   # Required Go tools
   log_step "=== Installing Required Tools ==="
   echo
@@ -224,7 +306,7 @@ main() {
   fi
   
   if $has_python; then
-    install_python_tool "uro" "uro" || failed_tools+=("uro")
+    install_python_tool_pipx "uro" "uro" || failed_tools+=("uro")
     installed_count=$((installed_count + 1))
   fi
   
@@ -244,7 +326,7 @@ main() {
   
   # Optional Python tools
   if $has_python; then
-    install_python_tool "paramspider" "paramspider" || failed_tools+=("paramspider")
+    install_paramspider || failed_tools+=("paramspider")
     installed_count=$((installed_count + 1))
   fi
   
