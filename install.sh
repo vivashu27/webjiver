@@ -318,7 +318,7 @@ main() {
   if $has_go; then
     install_go_tool "amass" "github.com/owasp-amass/amass/v4/..." || failed_tools+=("amass")
     install_go_tool "hakrawler" "github.com/hakluke/hakrawler" || failed_tools+=("hakrawler")
-    install_go_tool "urlfinder" "github.com/pingc0y/urlfinder" || failed_tools+=("urlfinder")
+    install_go_tool "urlfinder" "github.com/projectdiscovery/urlfinder/cmd/urlfinder" || failed_tools+=("urlfinder")
     install_go_tool "nuclei" "github.com/projectdiscovery/nuclei/v3/cmd/nuclei" || failed_tools+=("nuclei")
     install_go_tool "dalfox" "github.com/hahwul/dalfox/v2" || failed_tools+=("dalfox")
     installed_count=$((installed_count + 5))
