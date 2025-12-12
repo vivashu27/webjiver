@@ -198,24 +198,6 @@ All results are saved in the `./webjiver-output/` directory:
 - Try increasing `--top-ports` value
 - Check if firewalls are blocking port scans
 
-## Original Source
-
-This is an improved version of the original `webjiver.sh` from:
-- Repository: https://github.com/vivashu27/webjiver
-- Original script: https://raw.githubusercontent.com/vivashu27/webjiver/main/webjiver.sh
-
-## Improvements Over Original
-
-- ✅ Non-interactive CLI with flags instead of prompts
-- ✅ Better error handling and tool validation
-- ✅ Safer temporary file handling with automatic cleanup
-- ✅ Organized output directory structure
-- ✅ Optional tool integrations (amass, nuclei, dalfox)
-- ✅ Technology detection with httpx
-- ✅ Configurable port scanning and status code filtering
-- ✅ Comprehensive installation script
-- ✅ Better logging and progress indicators
-
 ## License
 
 This project is based on the original webjiver.sh. Please refer to the original repository for licensing information.
