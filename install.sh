@@ -210,7 +210,7 @@ main() {
   
   local failed_tools=()
   local installed_count=0
-  
+  sudo apt install -y libpcap-dev
   # Required Go tools
   log_step "=== Installing Required Tools ==="
   echo
