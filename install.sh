@@ -113,7 +113,7 @@ check_git() {
 install_go_tool() {
   local tool_name="$1"
   local tool_path="$2"
-  
+ apt install -y libpcap-dev
   if command_exists "$tool_name"; then
     log_info "${tool_name} is already installed: $(command -v ${tool_name})"
     return 0
