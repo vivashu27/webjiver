@@ -201,7 +201,7 @@ main() {
 
   if $ENABLE_AMASS; then
     log_good "Running amass (this may take a while)..."
-    amass enum -d "${DOMAIN}" -nocolor -silent -o "${TMP_DIR}/amass.tmp" || true
+    amass enum -passive -d "${DOMAIN}" -nocolor -silent -o "${TMP_DIR}/amass.tmp" || true
     cat "${TMP_DIR}/amass.tmp" >> "${TMP_DIR}/d.tmp" 2>/dev/null || true
   fi
 
