@@ -113,7 +113,7 @@ check_git() {
 install_go_tool() {
   local tool_name="$1"
   local tool_path="$2"
- apt install -y libpcap-dev
+  apt install -y libpcap-dev
   if command_exists "$tool_name"; then
     log_info "${tool_name} is already installed: $(command -v ${tool_name})"
     return 0
@@ -257,9 +257,11 @@ install_paramspider() {
   return 0
 }
 
-# Install knockpy from source (requires git + python)
+# Install knockpy from source (requires git + python3)
 install_knockpy() {
-  local repo_url="https://github.com/guelfoweb/knock.git"
+  local repo_url="https://github.com/guelfoweb/knockpy.git"
+  local install_dir="$HOME/.local/share/knockpy"
+  local user_bin="$HOME/.local/bin"
 
   if command_exists "knockpy"; then
     log_info "knockpy is already installed: $(command -v knockpy)"
@@ -271,39 +273,44 @@ install_knockpy() {
     return 1
   fi
 
-  local tmp_dir
-  tmp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t 'knockpy')"
-  if [[ -z "${tmp_dir}" || "${tmp_dir}" == "/" ]]; then
-    log_error "Failed to create temporary directory for knockpy"
+  if ! command_exists python3; then
+    log_error "Python3 is required to install knockpy."
     return 1
   fi
 
-  log_step "Installing knockpy from source..."
-  local pip_cmd="pip3"
-  if command_exists pip && ! command_exists pip3; then
-    pip_cmd="pip"
-  fi
+  log_step "Installing knockpy from source into ${install_dir}..."
+
+  # Clean any previous partial install
+  rm -rf "${install_dir}" 2>/dev/null || true
 
   if (
-    cd "${tmp_dir}" &&
-    git clone "${repo_url}" &&
-    cd knock &&
-    ${pip_cmd} install --user .
+    git clone "${repo_url}" "${install_dir}" &&
+    cd "${install_dir}" &&
+    python3 -m venv .venv &&
+    . .venv/bin/activate &&
+    python3 -m pip install -U pip &&
+    pip install .
   ); then
     log_good "knockpy installed successfully"
   else
     log_error "Failed to install knockpy"
-    rm -rf "${tmp_dir}" || true
+    rm -rf "${install_dir}" || true
     return 1
   fi
 
-  rm -rf "${tmp_dir}" || true
+  # Create a wrapper script so knockpy is accessible from PATH
+  mkdir -p "${user_bin}"
+  cat > "${user_bin}/knockpy" <<'WRAPPER'
+#!/usr/bin/env bash
+KNOCKPY_DIR="$HOME/.local/share/knockpy"
+exec "${KNOCKPY_DIR}/.venv/bin/knockpy" "$@"
+WRAPPER
+  chmod +x "${user_bin}/knockpy"
 
   if command_exists "knockpy"; then
     log_good "knockpy is available in PATH"
   else
     log_warn "knockpy installed but not in PATH"
-    local user_bin="$HOME/.local/bin"
     if [[ ":$PATH:" != *":${user_bin}:"* ]]; then
       log_info "Add this to your ~/.bashrc or ~/.zshrc:"
       log_info "  export PATH=\$PATH:\$HOME/.local/bin"
