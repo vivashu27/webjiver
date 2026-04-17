@@ -25,7 +25,7 @@ log_good()  { echo -e "${GREEN}[+]${NC} $*"; }
 log_warn()  { echo -e "${YELLOW}[!]${NC} $*"; }
 log_error() { echo -e "${RED}[-]${NC} $*" >&2; }
 log_step()  { echo -e "${CYAN}[*]${NC} $*"; }
-
+sudo apt install -y libpcap-dev
 # Check if command exists
 command_exists() {
   command -v "$1" >/dev/null 2>&1
